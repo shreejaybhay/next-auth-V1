@@ -1,13 +1,14 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { IconAlertTriangle, IconHome, IconRefresh } from '@tabler/icons-react';
+import { IconAlertTriangle, IconHome, IconRefresh, IconLoader2 } from '@tabler/icons-react';
 
-export default function AuthErrorPage() {
+function AuthErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
@@ -93,5 +94,18 @@ export default function AuthErrorPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AuthErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
+        <IconLoader2 className="h-8 w-8 animate-spin mb-4" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    }>
+      <AuthErrorContent />
+    </Suspense>
   );
 }
