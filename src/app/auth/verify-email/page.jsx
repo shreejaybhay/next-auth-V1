@@ -1,32 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { useEffect, useRef, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-import {
-  IconLoader2,
-  IconCheck,
-  IconX,
-  IconMail,
-} from '@tabler/icons-react';
+import { IconLoader2, IconCheck, IconX, IconMail } from "@tabler/icons-react";
 
-export default function VerifyEmailPage() {
-  const [status, setStatus] = useState('verifying'); // verifying | success | error
-  const [message, setMessage] = useState('');
+function VerifyEmailContent() {
+  const [status, setStatus] = useState("verifying"); // verifying | success | error
+  const [message, setMessage] = useState("");
 
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
   const hasVerified = useRef(false);
 
   useEffect(() => {
@@ -35,8 +30,8 @@ export default function VerifyEmailPage() {
 
     const verifyEmail = async () => {
       if (!token) {
-        setStatus('error');
-        setMessage('Verification token is missing or invalid.');
+        setStatus("error");
+        setMessage("Verification token is missing or invalid.");
         return;
       }
 
@@ -48,16 +43,16 @@ export default function VerifyEmailPage() {
         const data = await response.json();
 
         if (response.ok) {
-          setStatus('success');
-          setMessage(data.message || 'Your email has been verified.');
+          setStatus("success");
+          setMessage(data.message || "Your email has been verified.");
         } else {
-          setStatus('error');
-          setMessage(data.error || 'Verification link is invalid or expired.');
+          setStatus("error");
+          setMessage(data.error || "Verification link is invalid or expired.");
         }
       } catch (err) {
-        console.error('Verification error:', err);
-        setStatus('error');
-        setMessage('Something went wrong. Please try again.');
+        console.error("Verification error:", err);
+        setStatus("error");
+        setMessage("Something went wrong. Please try again.");
       }
     };
 
@@ -69,58 +64,57 @@ export default function VerifyEmailPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            {status === 'verifying' && (
+            {status === "verifying" && (
               <IconLoader2 className="h-6 w-6 animate-spin" />
             )}
-            {status === 'success' && <IconCheck className="h-6 w-6" />}
-            {status === 'error' && <IconX className="h-6 w-6" />}
+            {status === "success" && <IconCheck className="h-6 w-6" />}
+            {status === "error" && <IconX className="h-6 w-6" />}
           </div>
 
           <CardTitle className="text-2xl font-bold">
-            {status === 'verifying' && 'Verifying Email'}
-            {status === 'success' && 'Email Verified'}
-            {status === 'error' && 'Verification Failed'}
+            {status === "verifying" && "Verifying Email"}
+            {status === "success" && "Email Verified"}
+            {status === "error" && "Verification Failed"}
           </CardTitle>
 
           <CardDescription>
-            {status === 'verifying' &&
-              'Please wait while we verify your email address.'}
-            {status === 'success' &&
-              'Your email has been successfully verified.'}
-            {status === 'error' &&
-              'There was a problem verifying your email.'}
+            {status === "verifying" &&
+              "Please wait while we verify your email address."}
+            {status === "success" &&
+              "Your email has been successfully verified."}
+            {status === "error" && "There was a problem verifying your email."}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {status === 'success' && (
+          {status === "success" && (
             <Alert>
               <IconCheck className="h-4 w-4" />
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <Alert variant="destructive">
               <IconX className="h-4 w-4" />
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
 
-          {status === 'verifying' && (
+          {status === "verifying" && (
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
               <IconMail className="h-4 w-4" />
               <span>Checking your verification token…</span>
             </div>
           )}
 
-          {status === 'success' && (
+          {status === "success" && (
             <Button asChild className="w-full">
               <Link href="/auth/signin">Sign In</Link>
             </Button>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <div className="space-y-2">
               <Button asChild className="w-full">
                 <Link href="/auth/signup">Sign Up Again</Link>
@@ -133,5 +127,26 @@ export default function VerifyEmailPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <Card className="w-full max-w-md">
+            <CardContent className="flex flex-col items-center justify-center p-8">
+              <IconLoader2 className="h-8 w-8 animate-spin mb-4" />
+              <p className="text-muted-foreground">
+                Loading verification page...
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
